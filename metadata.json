@@ -1,0 +1,6 @@
+{
+  "name": "Inventario Moto Bodega",
+  "description": "Control de stock e inventario ultra-rápido para bodega de accesorios de motocicletas, diseñado con alta legibilidad y botones grandes para uso táctil.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
