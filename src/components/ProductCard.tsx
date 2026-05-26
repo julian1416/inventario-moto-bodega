@@ -1,30 +1,15 @@
 import { useState } from 'react';
 import { Product } from '../types';
-import { ZoomIn, X, Trash2, Edit2, Copy } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { getCategoryFallbackImage } from '../utils/imageCompression';
+import { Plus, Minus, Edit2, Trash2, Copy, Eye } from 'lucide-react';
 
 interface ProductCardProps {
-  key?: string;
   product: Product;
-  onIncreaseStock: (id: string) => void;
-  onDecreaseStock: (id: string) => void;
+  onIncreaseStock: (id: string) => Promise<void>;
+  onDecreaseStock: (id: string) => Promise<void>;
   onEdit: (product: Product) => void;
-  onDelete: (id: string) => void;
-  onDuplicate: (product: Product) => void;
+  onDelete: (id: string) => Promise<void>;
+  onDuplicate: (product: Product) => Promise<void>;
 }
-
-const getCategoryColorBar = (cat: string) => {
-  switch (cat) {
-    case 'Cascos': return 'bg-red-500';          // Red
-    case 'Llantas': return 'bg-blue-600';         // Blue
-    case 'Impermeables': return 'bg-yellow-400';   // Yellow
-    case 'Defensas': return 'bg-orange-500';      // Orange
-    case 'Parrillas': return 'bg-purple-600';     // Purple
-    case 'Lujos': return 'bg-emerald-500';       // Green
-    default: return 'bg-zinc-400';
-  }
-};
 
 export function ProductCard({
   product,
@@ -36,215 +21,196 @@ export function ProductCard({
 }: ProductCardProps) {
   const { id, categoria, descripcion, stock, imagen } = product;
   const [isZoomed, setIsZoomed] = useState(false);
-
+  
   const isOutOfStock = stock === 0;
-  const activeImage = imagen || getCategoryFallbackImage(categoria, id);
+  const isLowStock = stock > 0 && stock <= 2;
+
+  // Render Category emojis nicely
+  const getCategoryEmoji = (cat: string) => {
+    switch (cat) {
+      case 'Cascos': return '🪖';
+      case 'Llantas': return '🛞';
+      case 'Impermeables': return '🧥';
+      case 'Defensas': return '🛡️';
+      case 'Parrillas': return '🎒';
+      case 'Lujos': return '✨';
+      default: return '📦';
+    }
+  };
+
+  // Determine elegant, limited color alerts for low stock
+  const borderClass = isOutOfStock
+    ? 'border-zinc-300 bg-zinc-50'
+    : isLowStock
+    ? 'border-amber-500 bg-amber-50/30'
+    : 'border-black bg-white';
 
   return (
     <>
       <div
         id={`product-card-${id}`}
-        className={`bg-white border-2 border-black rounded-2xl p-3 flex items-center justify-between gap-3.5 transition-all relative overflow-hidden ${
-          isOutOfStock ? 'bg-red-50/20 border-red-500' : 'border-black'
-        }`}
+        className={`border-2 rounded-2xl p-3 flex items-center justify-between gap-3 transition-all relative overflow-hidden ${borderClass}`}
       >
-        {/* FOTO GRANDE A LA IZQUIERDA (Prioridad Visual) */}
-        <div className="relative shrink-0">
+        {/* LEFT: IMAGE PREVIEW */}
+        <div className="relative shrink-0 w-20 h-20 bg-zinc-100 rounded-xl border border-zinc-200 overflow-hidden select-none">
           <button
+            type="button"
             onClick={() => setIsZoomed(true)}
-            className="relative block w-[84px] h-[84px] rounded-xl bg-zinc-100 overflow-hidden border-2 border-black transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-black"
-            title="Presiona para ampliar imagen"
-            style={{ minWidth: '84px', minHeight: '84px' }}
+            className="w-full h-full block focus:outline-none"
+            title="Ampliar foto"
           >
-            <img
-              src={activeImage}
-              alt="Accesorio"
-              referrerPolicy="no-referrer"
-              className={`w-full h-full object-cover transition-all ${isOutOfStock ? 'grayscale opacity-60 contrast-75 brightness-75' : ''}`}
-            />
-            {/* Lente o indicador de Zoom mínimo o Agotado */}
-            {!isOutOfStock ? (
-              <div className="absolute bottom-1 right-1 bg-black text-white rounded px-1 py-0.5 text-[8px] font-black uppercase tracking-wider flex items-center gap-0.5" style={{ pointerEvents: 'none' }}>
-                <ZoomIn className="w-2.5 h-2.5" />
-                <span>VER</span>
+            {imagen ? (
+              <img
+                src={imagen}
+                alt={descripcion}
+                className={`w-full h-full object-cover transition-transform duration-300 hover:scale-110 ${
+                  isOutOfStock ? 'grayscale opacity-60 contrast-75 brightness-75' : ''
+                }`}
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-zinc-100 text-zinc-400 font-bold uppercase text-[10px]">
+                Sin Foto
+              </div>
+            )}
+
+            {/* Agotado / Zoom overlays */}
+            {isOutOfStock ? (
+              <div className="absolute inset-x-0 bottom-0 bg-black/85 text-white text-[9px] font-black text-center py-0.5 tracking-wider uppercase leading-none">
+                Agotado
               </div>
             ) : (
-              <div className="absolute inset-x-0 bottom-0 bg-black/80 text-white text-[9px] font-bold text-center py-0.5 tracking-wider uppercase" style={{ pointerEvents: 'none' }}>
-                Agotado
+              <div className="absolute bottom-1 right-1 bg-black/75 text-white rounded p-0.5 text-[8px] flex items-center justify-center" style={{ pointerEvents: 'none' }}>
+                <Eye className="w-2.5 h-2.5" />
               </div>
             )}
           </button>
         </div>
 
-        {/* CONTENIDO DESCRIPTIVO EN EL CENTRO (Texto Única Línea / Multi-línea completo sin cortar) */}
-        <div className="flex-1 min-w-0 text-left">
-          {/* Categoría o Tipo + Indicación de color relacionada */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-1">
-            <span className="inline-block px-2 py-0.5 rounded bg-zinc-100 border border-zinc-350 text-[10px] font-black uppercase text-zinc-700 tracking-wider">
-              {categoria}
-            </span>
-
-            {/* Advertencia Stock */}
-            {isOutOfStock && (
-              <span className="inline-block text-[10px] font-black bg-red-100 text-red-700 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                Agotado
+        {/* MIDDLE: METADATA & TEXTS */}
+        <div className="flex-1 min-w-0 pr-1 flex flex-col justify-between h-20">
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black uppercase text-zinc-500 font-mono tracking-wider">
+                {getCategoryEmoji(categoria)} {categoria}
               </span>
-            )}
+              {isLowStock && (
+                <span className="bg-amber-100 text-amber-900 border border-amber-300 font-sans text-[8px] font-black px-1.5 py-0.5 rounded uppercase leading-none tracking-wide animate-pulse">
+                  Por Agotar
+                </span>
+              )}
+              {isOutOfStock && (
+                <span className="bg-red-100 text-red-900 border border-red-300 font-sans text-[8px] font-black px-1.5 py-0.5 rounded uppercase leading-none tracking-wide">
+                  Sin Stock
+                </span>
+              )}
+            </div>
+            
+            <h3 className="text-[12.5px] font-black text-black leading-tight mt-1 line-clamp-2 uppercase">
+              {(!descripcion || descripcion === 'undefined' || descripcion === 'null') ? 'Sin descripción' : descripcion}
+            </h3>
           </div>
 
-          {/* Único Campo de Descripción Libre (Grande, Negrita y forzado a Multi-línea completo) */}
-          <p className="text-[15px] font-extrabold text-black leading-snug break-words whitespace-normal select-all">
-            {descripcion}
-          </p>
-
-          {/* Botones secundarios discretos de Editar, Duplicar, Borrar con hitbox grande (al menos 44px de click indirecto) */}
-          <div className="flex flex-wrap gap-x-3.5 gap-y-1 mt-2">
+          {/* Quick interactive utility action bar */}
+          <div className="flex items-center gap-3 text-zinc-450">
             <button
               onClick={() => onEdit(product)}
-              className="text-[12px] font-black text-blue-800 hover:text-black hover:underline flex items-center gap-0.5 py-1.5 cursor-pointer active:scale-95 transition-transform"
-              style={{ minHeight: '36px' }}
-              title="Modificar los datos"
+              className="text-zinc-500 hover:text-black flex items-center gap-0.5 font-bold font-mono text-[9px] uppercase hover:underline cursor-pointer"
+              title="Editar"
             >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>Editar</span>
+              <Edit2 className="w-3 h-3 stroke-[2.5]" />
+              <span>EDITAR</span>
             </button>
-
             <button
               onClick={() => onDuplicate(product)}
-              className="text-[12px] font-black text-purple-700 hover:text-black hover:underline flex items-center gap-0.5 py-1.5 cursor-pointer active:scale-95 transition-transform"
-              style={{ minHeight: '36px' }}
-              title="Duplicar este accesorio para registrar una variación rápidamente"
+              className="text-zinc-500 hover:text-black flex items-center gap-0.5 font-bold font-mono text-[9px] uppercase hover:underline cursor-pointer"
+              title="Duplicar"
             >
-              <Copy className="w-3.5 h-3.5" />
-              <span>Duplicar</span>
+              <Copy className="w-3 h-3 stroke-[2.5]" />
+              <span>COPIAR</span>
             </button>
-
             <button
               onClick={() => {
-                if (window.confirm('¿Deseas eliminar este accesorio de la lista?')) {
+                if (window.confirm('¿Seguro que deseas eliminar este accesorio de la bodega?')) {
                   onDelete(id);
                 }
               }}
-              className="text-[12px] font-black text-red-650 hover:text-red-900 hover:underline flex items-center gap-0.5 py-1.5 cursor-pointer active:scale-95 transition-transform"
-              style={{ minHeight: '36px' }}
-              title="Borrar accesorio"
+              className="text-zinc-400 hover:text-red-600 flex items-center gap-0.5 font-bold font-mono text-[9px] uppercase hover:underline cursor-pointer ml-auto"
+              title="Eliminar"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Borrar</span>
+              <Trash2 className="w-3.5 h-3.5 stroke-[2]" />
             </button>
           </div>
         </div>
 
-        {/* CONTROLES DE STOCK GIGANTES A LA DERECHA (One-Touch para pulgar de 55 años) */}
-        <div className="flex flex-col items-center gap-1 shrink-0 pl-1">
-          {/* Número de Stock visible destacado */}
-          <div className="flex items-baseline justify-center select-none">
-            <span className={`text-[28px] font-black tracking-tight leading-none ${isOutOfStock ? 'text-red-600' : 'text-black'}`}>
-              {stock}
-            </span>
-            <span className="text-[10px] font-black text-zinc-500 uppercase ml-0.5">Uds</span>
-          </div>
+        {/* RIGHT: COHESIVE STOCK STEPPER CONTROLLER */}
+        <div className="shrink-0 flex flex-col items-center bg-zinc-100 border-2 border-black rounded-2xl p-1 w-[60px] justify-between h-20 shadow-sm relative z-10">
+          <button
+            onClick={() => onIncreaseStock(id)}
+            className="w-12 h-7 rounded-lg bg-white border-2 border-black hover:bg-zinc-150 flex items-center justify-center text-black font-black active:scale-90 transition-transform cursor-pointer"
+            title="Aumentar stock"
+          >
+            <Plus className="w-4.5 h-4.5 stroke-[4]" />
+          </button>
 
-          {/* Botones de control físico [- / +] gigantes, separados e independientes */}
-          <div className="flex gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDecreaseStock(id);
-              }}
-              disabled={isOutOfStock}
-              className={`w-[44px] h-[44px] border-2 border-black rounded-lg flex items-center justify-center transition-all select-none font-black text-2xl active:scale-90 ${
-                isOutOfStock
-                  ? 'bg-zinc-100 text-zinc-350 border-zinc-200 cursor-not-allowed'
-                  : 'bg-zinc-100 text-black hover:bg-zinc-200 active:bg-zinc-300'
-              }`}
-              title="Restar una unidad"
-              style={{ minWidth: '44px', minHeight: '44px' }}
-            >
-              −
-            </button>
+          <span className="text-[17px] font-black text-black leading-none my-0.5 font-mono">
+            {stock}
+          </span>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onIncreaseStock(id);
-              }}
-              className="w-[44px] h-[44px] bg-black text-white hover:bg-zinc-900 rounded-lg flex items-center justify-center transition-all select-none font-black text-2xl active:scale-90 border-2 border-black"
-              title="Sumar una unidad"
-              style={{ minWidth: '44px', minHeight: '44px' }}
-            >
-              +
-            </button>
-          </div>
+          <button
+            onClick={() => onDecreaseStock(id)}
+            disabled={isOutOfStock}
+            className={`w-12 h-7 rounded-lg flex items-center justify-center font-black active:scale-90 transition-transform cursor-pointer ${
+              isOutOfStock
+                ? 'bg-zinc-200 border border-zinc-350 text-zinc-400 cursor-not-allowed'
+                : 'bg-white border-2 border-black hover:bg-zinc-150 text-black'
+            }`}
+            title="Disminuir stock"
+          >
+            <Minus className="w-4.5 h-4.5 stroke-[4]" />
+          </button>
         </div>
       </div>
 
-      {/* MODAL DE ZOOM DE FOTO EXCLUSIVO CON DATOS CLAROS */}
-      <AnimatePresence>
-        {isZoomed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-6"
-            onClick={() => setIsZoomed(false)}
-          >
-            {/* Botón de cerrar Gigante para el pulgar de 55 años */}
+      {/* FULL-SCREEN IMAGE POPUP LIGHTBOX */}
+      {isZoomed && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setIsZoomed(false)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in"
+        >
+          <div className="max-w-md w-full relative">
             <button
               onClick={() => setIsZoomed(false)}
-              className="absolute top-12 right-6 w-12 h-12 bg-white text-black active:scale-95 rounded-full flex items-center justify-center border-2 border-black focus:outline-none cursor-pointer"
-              title="Cerrar vista grande"
-              style={{ minWidth: '48px', minHeight: '48px' }}
+              className="absolute -top-12 right-0 text-white font-black text-xs uppercase flex items-center gap-1 cursor-pointer bg-zinc-900 border-2 border-white px-3 py-1.5 rounded-full"
             >
-              <X className="w-6 h-6 stroke-[3]" />
+              ✕ Cerrar
             </button>
-
-            {/* Contenido Ampliado */}
-            <motion.div
-              initial={{ scale: 0.9, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 15 }}
-              className="w-full max-w-md bg-white rounded-2xl overflow-hidden border-2 border-black p-4 space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-zinc-50 border-2 border-black">
-                <img
-                  src={activeImage}
-                  alt="Accesorio ampliado"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              {/* Detalles legibles */}
-              <div className="text-left space-y-2">
-                <span className="inline-block px-2.5 py-1 rounded bg-zinc-100 border border-black text-xs font-black uppercase text-zinc-800 tracking-wider">
-                  Categoría: {categoria}
+            <div className="bg-white border-4 border-black rounded-3xl overflow-hidden shadow-2xl p-2">
+              <img
+                src={imagen}
+                alt={descripcion}
+                className="w-full max-h-[400px] object-contain rounded-2xl mx-auto"
+              />
+              <div className="p-4 bg-zinc-50 border-t border-zinc-200 mt-2 rounded-xl text-center">
+                <span className="bg-black text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase font-mono tracking-widest inline-block mb-1.5">
+                  {categoria}
                 </span>
-                
-                <h2 className="text-xl font-black text-black leading-snug">
-                  {descripcion}
-                </h2>
-                
-                <div className="bg-zinc-100 p-3.5 rounded-xl border-2 border-black text-center">
-                  <span className="text-xs font-bold text-zinc-500 block uppercase">CANTIDAD DISPONIBLE EN BODEGA</span>
-                  <span className={`text-3xl font-black ${stock === 0 ? 'text-red-650' : 'text-black'}`}>
-                    {stock} {stock === 1 ? 'Unidad' : 'Unidades'}
+                <p className="text-sm font-black text-black uppercase leading-tight">{descripcion}</p>
+                <div className="mt-3 flex items-center justify-center gap-3 font-mono">
+                  <span className="text-xs font-bold text-zinc-550">STOCK ACTUAL:</span>
+                  <span className={`text-[15px] font-black px-3 py-0.5 rounded-full border-2 ${
+                    isOutOfStock ? 'bg-red-100 text-red-900 border-red-400' : 'bg-black text-white border-black'
+                  }`}>
+                    {stock} uds
                   </span>
                 </div>
               </div>
-
-              <button
-                onClick={() => setIsZoomed(false)}
-                className="w-full bg-black text-white hover:bg-zinc-800 font-black py-4 rounded-xl cursor-pointer active:scale-95 transition-transform"
-                style={{ minHeight: '44px' }}
-              >
-                Cerrar Detalle
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

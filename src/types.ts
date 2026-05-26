@@ -1,9 +1,9 @@
+export type Category = 'Cascos' | 'Llantas' | 'Impermeables' | 'Defensas' | 'Parrillas' | 'Lujos';
+
 export interface Product {
   id: string;
-  categoria: 'Cascos' | 'Llantas' | 'Impermeables' | 'Defensas' | 'Parrillas' | 'Lujos';
-  descripcion: string; // Unificado: Toda la descripción técnica, color, talla, compatibilidad, etc.
+  categoria: Category;
+  descripcion: string;
   stock: number;
-  imagen?: string; // Base64 compressed image or placeholder URL
+  imagen?: string; // Standard base64 data string, public Supabase Storage URL, or default SVG url
 }
-
-export type Category = 'Cascos' | 'Llantas' | 'Impermeables' | 'Defensas' | 'Parrillas' | 'Lujos';
