@@ -1,47 +1,43 @@
 import { Product } from '../types';
+import { Download } from 'lucide-react';
 
 interface HeaderProps {
   products: Product[];
+  onExport?: () => void;
 }
 
-export function Header({ products }: HeaderProps) {
+export function Header({ products, onExport }: HeaderProps) {
   const totalStock = products.reduce((acc, curr) => acc + curr.stock, 0);
-  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= 2).length;
-  const outOfStockCount = products.filter((p) => p.stock === 0).length;
 
   return (
-    <header className="p-5 border-b border-zinc-200 bg-white shrink-0">
+    <header className="px-5 py-4 border-b border-zinc-150 bg-white shrink-0">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-black tracking-tight leading-none text-black">
+          <h1 className="text-[19px] font-black tracking-tight leading-none text-black">
             MOTO BODEGA
           </h1>
-          <p className="text-[10px] font-bold text-zinc-400 tracking-wider mt-1 uppercase font-mono">
+          <p className="text-[9px] font-extrabold text-zinc-400 tracking-wider mt-1 uppercase font-mono">
             Control de Inventario
           </p>
         </div>
         
-        {/* Sleek, readable metrics container */}
-        <div className="flex items-center gap-1.5 font-mono">
-          <div className="bg-zinc-100 border-2 border-black rounded-lg px-2.5 py-1 text-center min-w-[50px] shadow-sm">
-            <span className="block text-[15px] font-black leading-none text-black">{totalStock}</span>
-            <span className="text-[7.5px] font-black text-zinc-500 uppercase">STOCK</span>
-          </div>
-
-          {(lowStockCount > 0 || outOfStockCount > 0) && (
-            <div className="flex flex-col gap-0.5 justify-center">
-              {lowStockCount > 0 && (
-                <div className="bg-amber-100 text-amber-900 border border-amber-300 text-[8px] font-black px-1.5 py-0.5 rounded uppercase leading-none text-center">
-                  ⚠️ {lowStockCount} por agotar
-                </div>
-              )}
-              {outOfStockCount > 0 && (
-                <div className="bg-red-100 text-red-900 border border-red-300 text-[8px] font-black px-1.5 py-0.5 rounded uppercase leading-none text-center">
-                  🚫 {outOfStockCount} sin stock
-                </div>
-              )}
-            </div>
+        {/* Sleek, readable metrics container and Export Button */}
+        <div className="flex items-center gap-2 font-mono">
+          {onExport && (
+            <button
+              onClick={onExport}
+              className="p-1 px-2 rounded-lg bg-zinc-50 border border-zinc-200 hover:border-black active:scale-95 transition-all text-black hover:bg-zinc-100 flex items-center gap-1 cursor-pointer"
+              title="Exportar planilla Excel/CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="text-[9px] font-bold">CSV</span>
+            </button>
           )}
+
+          <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1 text-center min-w-[50px] flex flex-col justify-center items-center">
+            <span className="block text-[14px] font-black leading-none text-black">{totalStock}</span>
+            <span className="text-[7px] font-bold text-zinc-400">STOCK</span>
+          </div>
         </div>
       </div>
     </header>

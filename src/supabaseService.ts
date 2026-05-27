@@ -1,6 +1,6 @@
-// src/supabaseService.ts
 import { supabase, isSupabaseConfigured, uploadProductImage } from './supabaseClient';
 import { Product } from './types';
+import { parseProductDescription, formatProductDescription } from './utils/productUtils';
 
 export async function fetchProducts(): Promise<Product[]> {
   if (!isSupabaseConfigured || !supabase) {
@@ -10,111 +10,155 @@ export async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from('productos')
     .select('*')
+    // We can order by updated_at or id and category
     .order('id', { ascending: false });
 
   if (error) {
-    console.error('Error al traer productos de Supabase:', error);
+    console.error('Error fetching from Supabase table:', error);
     throw error;
   }
 
-  return (data || []).map((row: any) => ({
-    id: String(row.id),
-    categoria: row.categoria || 'Lujos',
-    descripcion: row.descripcion || '',
-    stock: Number(row.stock || 0),
-    imagen: row.imagen || '', // Usamos 'imagen' exactamente
-  }));
+  // Ensure fields are correctly mapped to our local TypeScript application schema and sanitized
+  return (data || []).map((row: any) => {
+    const rawDesc = row.descripcion || row.desc || row.name || '';
+    const cleanDesc = (rawDesc === 'undefined' || rawDesc === 'null') ? '' : String(rawDesc);
+    const parsed = parseProductDescription(cleanDesc, row.categoria || 'Lujos');
+    return {
+      id: String(row.id),
+      categoria: row.categoria || 'Lujos',
+      descripcion: parsed.descripcionLimpia,
+      stock: Number(row.stock !== undefined && row.stock !== null ? row.stock : 0),
+      imagen: row.imagen || '',
+      tallas: parsed.tallas,
+    };
+  });
 }
 
 export async function saveProduct(
-  productData: Omit<Product, 'id'> & { id?: string; imagen?: string }
+  productData: Omit<Product, 'id'> & { id?: string; imagen?: string; tallas?: Record<string, number> }
 ): Promise<Product> {
   if (!isSupabaseConfigured || !supabase) {
-    throw new Error('Supabase no está conectado.');
+    throw new Error('Supabase no se encuentra activo o configurado.');
   }
 
-  let finalImageUrl = productData.imagen || '';
+  let finalImageUrl = productData.imagen;
 
-  // Si es una foto nueva tomada con el iPhone (base64), la subimos al Storage
-  if (finalImageUrl.startsWith('data:image/')) {
+  // If we have a new base64 image, upload it to the storage bucket first
+  if (productData.imagen && productData.imagen.startsWith('data:image/')) {
     try {
-      finalImageUrl = await uploadProductImage(finalImageUrl);
+      finalImageUrl = await uploadProductImage(productData.imagen);
     } catch (e) {
-      console.error('Error subiendo imagen, se guardará sin foto:', e);
-      finalImageUrl = ''; 
+      console.error('No se pudo subir la imagen al bucket, persistiendo base64 local en la base de datos:', e);
     }
   }
 
-  // Preparamos los datos EXACTOS que espera la tabla en Supabase
+  // Format description with size-stocks before database persistence
+  const dbDescription = formatProductDescription(productData.descripcion, productData.categoria, productData.tallas);
+
   const payload = {
     categoria: productData.categoria,
-    descripcion: productData.descripcion,
-    stock: Number(productData.stock),
-    imagen: finalImageUrl, // EL NOMBRE DEBE SER 'imagen'
+    descripcion: dbDescription,
+    stock: productData.stock,
+    imagen: finalImageUrl,
   };
 
   if (productData.id && !isNaN(Number(productData.id))) {
-    // ACTUALIZAR PRODUCTO EXISTENTE
+    // Update existing row
     const { data, error } = await supabase
       .from('productos')
       .update(payload)
       .eq('id', Number(productData.id))
       .select();
 
-    if (error) throw error;
-    const row = data?.[0];
-    if (!row) throw new Error('No se encontró el producto para actualizar.');
-    
+    if (error) {
+      throw error;
+    }
+
+    const updatedRow = data && data[0];
+    if (!updatedRow) {
+      throw new Error('No se pudo encontrar el producto en la nube para actualizar.');
+    }
+
+    const parsed = parseProductDescription(updatedRow.descripcion, updatedRow.categoria);
     return {
-      id: String(row.id),
-      categoria: row.categoria,
-      descripcion: row.descripcion,
-      stock: Number(row.stock),
-      imagen: row.imagen,
+      id: String(updatedRow.id),
+      categoria: updatedRow.categoria,
+      descripcion: parsed.descripcionLimpia,
+      stock: Number(updatedRow.stock),
+      imagen: updatedRow.imagen,
+      tallas: parsed.tallas,
     };
   } else {
-    // CREAR PRODUCTO NUEVO
+    // Insert new row
     const { data, error } = await supabase
       .from('productos')
       .insert([payload])
       .select();
 
-    if (error) throw error;
-    const row = data?.[0];
-    if (!row) throw new Error('Error al registrar en la base de datos.');
+    if (error) {
+      throw error;
+    }
 
+    const insertedRow = data && data[0];
+    if (!insertedRow) {
+      throw new Error('No se pudo registrar el new producto en la tabla Supabase.');
+    }
+
+    const parsed = parseProductDescription(insertedRow.descripcion, insertedRow.categoria);
     return {
-      id: String(row.id),
-      categoria: row.categoria,
-      descripcion: row.descripcion,
-      stock: Number(row.stock),
-      imagen: row.imagen,
+      id: String(insertedRow.id),
+      categoria: insertedRow.categoria,
+      descripcion: parsed.descripcionLimpia,
+      stock: Number(insertedRow.stock),
+      imagen: insertedRow.imagen,
+      tallas: parsed.tallas,
     };
   }
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  if (!isSupabaseConfigured || !supabase) return;
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase no está configurado.');
+  }
+
+  // Ensure high robustness on ID parsing
   const numericId = Number(id);
-  if (isNaN(numericId)) return;
+  if (isNaN(numericId)) {
+    // If it is a temporary local state ID, do nothing in the cloud table
+    return;
+  }
 
   const { error } = await supabase
     .from('productos')
     .delete()
     .eq('id', numericId);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 }
 
-export async function updateProductStock(id: string, newStock: number): Promise<void> {
-  if (!isSupabaseConfigured || !supabase) return;
+export async function updateProductStock(id: string, newStock: number, newDescription?: string): Promise<void> {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error('Supabase no está configurado.');
+  }
+
   const numericId = Number(id);
-  if (isNaN(numericId)) return;
+  if (isNaN(numericId)) {
+    return;
+  }
+
+  const payload: any = { stock: Math.max(0, newStock) };
+  if (newDescription) {
+    payload.descripcion = newDescription;
+  }
 
   const { error } = await supabase
     .from('productos')
-    .update({ stock: Math.max(0, newStock) })
+    .update(payload)
     .eq('id', numericId);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 }
