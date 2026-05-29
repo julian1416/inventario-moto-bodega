@@ -25,6 +25,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
   const [descripcion, setDescripcion] = useState('');
   const [stock, setStock] = useState<number>(1);
   const [tallasStock, setTallasStock] = useState<Record<string, number>>({ S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+  const [precio, setPrecio] = useState<string>('');
   const [imagen, setImagen] = useState<string>('');
   const [isCompacting, setIsCompacting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -36,6 +37,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
       setDescripcion(productToEdit.descripcion);
       setStock(productToEdit.stock);
       setImagen(productToEdit.imagen || '');
+      setPrecio(productToEdit.precio !== undefined && productToEdit.precio !== null ? String(productToEdit.precio) : '');
 
       const parsed = parseProductDescription(productToEdit.descripcion, productToEdit.categoria);
       if (parsed.tallas) {
@@ -49,6 +51,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
       setStock(1);
       setTallasStock({ S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
       setImagen('');
+      setPrecio('');
     }
     setErrorMessage('');
   }, [productToEdit, isOpen]);
@@ -113,6 +116,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
         stock: finalStock,
         imagen: finalImage,
         tallas: isSizeCategory ? tallasStock : undefined,
+        precio: categoria === 'Llantas' && precio ? Number(precio) : undefined,
         ...(productToEdit ? { id: productToEdit.id } : {}),
       });
       onClose();
@@ -190,6 +194,33 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
               className="w-full bg-white border-2 border-black rounded-xl p-3 text-[13px] font-black text-black placeholder-zinc-400 focus:outline-none uppercase"
             />
           </div>
+
+          {/* PRECIO DE VENTA (SOLO PARA LLANTAS) */}
+          {categoria === 'Llantas' && (
+            <div className="space-y-1.5 p-4 bg-zinc-50 border-2 border-black rounded-2xl">
+              <label className="block text-[10px] font-black text-zinc-500 uppercase font-mono tracking-wider">
+                🏷️ Precio de Venta (COP)
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-4.5 text-xl font-black text-black">$</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={precio ? Number(precio).toLocaleString('es-CO') : ''}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, '');
+                    setPrecio(rawValue);
+                  }}
+                  placeholder="0"
+                  className="w-full bg-white border-2 border-black rounded-xl py-3 pl-10 pr-4 text-lg font-black text-black font-mono focus:outline-none"
+                />
+              </div>
+              <span className="block text-[8px] font-bold text-zinc-400 font-mono text-right uppercase leading-none mt-1">
+                Ingresa valor sin puntos ni signos
+              </span>
+            </div>
+          )}
 
           {/* SIZES STOCK MULTI-INPUT (FOR CASCOS & IMPERMEABLES) */}
           {(categoria === 'Cascos' || categoria === 'Impermeables') ? (

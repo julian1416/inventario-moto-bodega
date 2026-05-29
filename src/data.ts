@@ -31,14 +31,16 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoria: 'Llantas',
     descripcion: 'Llanta Sellomatic Michelin Pilot Street 130/70-17',
     stock: 8,
-    imagen: createPlaceholderSVG('Llantas', 'Michelin 130/70-17')
+    imagen: createPlaceholderSVG('Llantas', 'Michelin 130/70-17'),
+    precio: 245000
   },
   {
     id: '4',
     categoria: 'Llantas',
     descripcion: 'Llanta para Lluvia Pirelli Diablo Rosso 140/60-17',
     stock: 2, // Low stock to test yellow alert indicator
-    imagen: createPlaceholderSVG('Llantas', 'Pirelli Diablo')
+    imagen: createPlaceholderSVG('Llantas', 'Pirelli Diablo'),
+    precio: 350000
   },
   {
     id: '5',
@@ -115,6 +117,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     categoria: 'Llantas',
     descripcion: 'Llanta para Scooter Maxxis Supermax 120/70-12',
     stock: 7,
-    imagen: createPlaceholderSVG('Llantas', 'Maxxis 120/70-12')
+    imagen: createPlaceholderSVG('Llantas', 'Maxxis 120/70-12'),
+    precio: 180000
   }
 ];

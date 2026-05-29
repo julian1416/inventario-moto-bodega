@@ -21,7 +21,7 @@ export function ProductCard({
   onDuplicate,
   onUpdateSizeStock,
 }: ProductCardProps) {
-  const { id, categoria, descripcion, stock, imagen, tallas } = product;
+  const { id, categoria, descripcion, stock, imagen, tallas, precio } = product;
   const [isZoomed, setIsZoomed] = useState(false);
   
   const isOutOfStock = stock === 0;
@@ -223,6 +223,16 @@ export function ProductCard({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* LOWER ROW: ELEGANT PRICE DISPLAY FOR LLANTAS */}
+        {categoria === 'Llantas' && (
+          <div className="w-full mt-1 pt-2 border-t border-zinc-200/60 flex items-center justify-between">
+            <span className="text-[9px] font-black text-zinc-500 font-mono uppercase tracking-wider">🏷️ PRECIO DE VENTA</span>
+            <span className="text-[13px] font-black font-mono text-emerald-700 bg-emerald-50 border-2 border-zinc-900 rounded-xl px-2.5 py-0.5 shadow-sm">
+              ${precio ? precio.toLocaleString('es-CO') : '0'}
+            </span>
           </div>
         )}
       </div>

@@ -30,6 +30,7 @@ export async function fetchProducts(): Promise<Product[]> {
       stock: Number(row.stock !== undefined && row.stock !== null ? row.stock : 0),
       imagen: row.imagen || '',
       tallas: parsed.tallas,
+      precio: row.precio !== undefined && row.precio !== null ? Number(row.precio) : undefined,
     };
   });
 }
@@ -55,12 +56,16 @@ export async function saveProduct(
   // Format description with size-stocks before database persistence
   const dbDescription = formatProductDescription(productData.descripcion, productData.categoria, productData.tallas);
 
-  const payload = {
+  const payload: any = {
     categoria: productData.categoria,
     descripcion: dbDescription,
     stock: productData.stock,
     imagen: finalImageUrl,
   };
+
+  if (productData.categoria === 'Llantas') {
+    payload.precio = productData.precio !== undefined ? Number(productData.precio) : null;
+  }
 
   if (productData.id && !isNaN(Number(productData.id))) {
     // Update existing row
@@ -87,6 +92,7 @@ export async function saveProduct(
       stock: Number(updatedRow.stock),
       imagen: updatedRow.imagen,
       tallas: parsed.tallas,
+      precio: updatedRow.precio !== undefined && updatedRow.precio !== null ? Number(updatedRow.precio) : undefined,
     };
   } else {
     // Insert new row
@@ -112,6 +118,7 @@ export async function saveProduct(
       stock: Number(insertedRow.stock),
       imagen: insertedRow.imagen,
       tallas: parsed.tallas,
+      precio: insertedRow.precio !== undefined && insertedRow.precio !== null ? Number(insertedRow.precio) : undefined,
     };
   }
 }

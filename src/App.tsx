@@ -244,6 +244,7 @@ export default function App() {
       descripcion: newDesc,
       stock: newStock,
       imagen: baseProduct.imagen,
+      precio: baseProduct.precio,
     };
 
     if (dbMode === 'cloud') {
@@ -279,7 +280,8 @@ export default function App() {
           categoria: item.categoria,
           descripcion: item.descripcion,
           stock: item.stock,
-          imagen: item.imagen
+          imagen: item.imagen,
+          precio: item.precio,
         });
       }
       await loadInventory(true);
