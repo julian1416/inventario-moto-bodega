@@ -377,7 +377,7 @@ export default function App() {
       <div className="w-full sm:w-[393px] h-screen sm:h-[800px] bg-white sm:shadow-[0_0_50px_rgba(0,0,0,0.15)] sm:rounded-[55px] sm:border-[12px] sm:border-black relative overflow-hidden flex flex-col">
         
         {/* Safe Area Notch & iPhone Status Bar design */}
-        <div className="w-full h-9 flex justify-between px-8 items-end pb-1 shrink-0 bg-white select-none border-b border-zinc-150">
+        <div className="w-full h-9 flex justify-between px-8 items-end pb-1 shrink-0 bg-white select-none border-b border-zinc-150 relative z-50">
           <span className="text-[13px] font-black text-black">9:41</span>
           {/* Dynamic Island spacer */}
           <div className="w-[110px] h-[25px] bg-black rounded-full absolute left-1/2 -translate-x-1/2 top-1.5 sm:block hidden"></div>
@@ -391,7 +391,7 @@ export default function App() {
         <Header products={products} onExport={handleExportInventory} />
 
         {/* Instant Search Bar & Filter buttons with high visual contrast */}
-        <div className="bg-white px-5 py-3 shrink-0 space-y-2.5 border-b border-zinc-150">
+        <div className="bg-white px-5 py-3 shrink-0 space-y-2.5 border-b border-zinc-150 relative z-40 shadow-xs">
           
           {/* Search box with large target reach */}
           <div className="relative">
@@ -491,7 +491,7 @@ export default function App() {
         </div>
 
         {/* Scrollable products screen */}
-        <main className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 bg-white pb-24 relative">
+        <main className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 bg-white pb-32 relative">
           
           {/* Transparent inline loading overlay */}
           {isLoading && (
@@ -575,23 +575,31 @@ export default function App() {
           )}
         </main>
 
-        {/* Floating Add FAB Button with spacious touch area */}
-        <div className="absolute bottom-6 right-5 z-40">
+        {/* SOLID STICKY BOTTOM MENU / FOOTER */}
+        <div className="bg-white border-t-2 border-black px-5 py-3.5 flex items-center justify-between shrink-0 relative z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.03)] pb-7">
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] font-black uppercase text-zinc-400 font-mono tracking-wider">MOTO BODEGA</span>
+            <span className="text-[12px] font-black text-black font-mono leading-none mt-1">
+              {filteredProducts.length} DE {products.length} REGISTRADOS
+            </span>
+          </div>
+
           <button
             onClick={() => {
               setProductToEdit(null);
               setIsModalOpen(true);
             }}
-            className="w-[56px] h-[56px] bg-black hover:bg-zinc-900 text-white font-black rounded-full shadow-2xl border-2 border-black flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
-            id="floating-new-product-btn"
+            className="bg-black hover:bg-zinc-950 border-2 border-black rounded-2xl flex items-center gap-1.5 px-4.5 py-2.5 text-[11px] font-black text-white active:scale-95 transition-all cursor-pointer shadow-md"
             title="Registrar nuevo accesorio"
+            id="floating-new-product-btn"
           >
-            <Plus className="w-7 h-7 stroke-[3.5]" />
+            <Plus className="w-4 h-4 stroke-[3.5]" />
+            <span className="uppercase tracking-wide">NUEVO ARTÍCULO</span>
           </button>
         </div>
 
         {/* Physical Home Indicator representation */}
-        <div className="absolute bottom-1.5 right-[130px] left-[130px] h-1 bg-black rounded-full select-none pointer-events-none sm:block hidden"></div>
+        <div className="absolute bottom-1 right-[130px] left-[130px] h-1 bg-black rounded-full select-none pointer-events-none sm:block hidden z-50"></div>
       </div>
 
       {/* PopUp iOS-style Dialog */}

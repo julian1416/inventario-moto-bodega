@@ -309,8 +309,8 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
             <div className="border-2 border-dashed border-zinc-300 rounded-xl p-3 bg-zinc-50 flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[110px]">
               {imagen ? (
                 <div className="space-y-2 w-full">
-                  <div className="relative w-20 h-20 mx-auto rounded-lg border-2 border-black overflow-hidden bg-white shadow-xs">
-                    <img src={imagen} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="relative w-20 h-20 mx-auto rounded-lg border-2 border-black overflow-hidden bg-zinc-100 shadow-xs">
+                    <img src={imagen} alt="Preview" className="w-full h-full object-contain bg-zinc-100" />
                     <button
                       type="button"
                       onClick={() => setImagen('')}

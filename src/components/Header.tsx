@@ -10,7 +10,7 @@ export function Header({ products, onExport }: HeaderProps) {
   const totalStock = products.reduce((acc, curr) => acc + curr.stock, 0);
 
   return (
-    <header className="px-5 py-4 border-b border-zinc-150 bg-white shrink-0">
+    <header className="px-5 py-4 border-b border-zinc-150 bg-white shrink-0 relative z-50">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[19px] font-black tracking-tight leading-none text-black">

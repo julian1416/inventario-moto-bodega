@@ -59,7 +59,7 @@ export function ProductCard({
         {/* UPPER ROW: Image, Metadata and Primary Controls/Badge */}
         <div className="flex items-center justify-between gap-2.5 w-full">
           {/* LEFT: COMPACT IMAGE PREVIEW */}
-          <div className="relative shrink-0 w-14 h-14 bg-zinc-50 rounded-lg border border-zinc-200 overflow-hidden select-none">
+          <div className="relative shrink-0 w-14 h-14 bg-zinc-100 rounded-lg border border-zinc-200 overflow-hidden select-none">
             <button
               type="button"
               onClick={() => setIsZoomed(true)}
@@ -70,7 +70,7 @@ export function ProductCard({
                 <img
                   src={imagen}
                   alt={descripcion}
-                  className={`w-full h-full object-cover transition-transform duration-300 hover:scale-110 ${
+                  className={`w-full h-full object-contain bg-zinc-100 transition-transform duration-300 hover:scale-110 ${
                     isOutOfStock ? 'grayscale opacity-60' : ''
                   }`}
                   loading="lazy"
@@ -113,7 +113,7 @@ export function ProductCard({
                 )}
               </div>
               
-              <h3 className="text-[12px] font-black text-zinc-900 leading-tight mt-0.5 line-clamp-1 uppercase tracking-tight">
+              <h3 className="text-[12px] font-black text-zinc-900 leading-tight mt-0.5 line-clamp-3 uppercase tracking-tight overflow-hidden break-words">
                 {(!descripcion || descripcion === 'undefined' || descripcion === 'null') ? 'Sin descripción' : descripcion}
               </h3>
             </div>
@@ -161,32 +161,32 @@ export function ProductCard({
               </span>
             </div>
           ) : (
-            <div className="shrink-0 flex items-center gap-1.5 bg-zinc-50 border-2 border-black rounded-xl p-1 relative z-10 shadow-xs">
+            <div className="shrink-0 flex items-center gap-1 bg-zinc-50 border-2 border-black rounded-xl p-0.5 relative z-10 shadow-xs">
               <button
                 onClick={() => onDecreaseStock(id)}
                 disabled={isOutOfStock}
-                className={`w-9 h-9 rounded-lg flex items-center justify-center font-black active:scale-90 transition-transform cursor-pointer ${
+                className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center font-black active:scale-90 transition-transform cursor-pointer ${
                   isOutOfStock
                     ? 'bg-zinc-200 text-zinc-400 border border-zinc-300 cursor-not-allowed'
                     : 'bg-white border-2 border-black hover:bg-zinc-100 text-black'
                 }`}
                 title="Disminuir stock"
-                style={{ width: '36px', height: '36px' }}
+                style={{ width: '30px', height: '30px' }}
               >
-                <Minus className="w-4.5 h-4.5 stroke-[4]" />
+                <Minus className="w-3.5 h-3.5 stroke-[4]" />
               </button>
 
-              <span className="w-6 text-center text-[16px] font-black text-black font-mono">
+              <span className="w-5 text-center text-[14px] font-black text-black font-mono">
                 {stock}
               </span>
 
               <button
                 onClick={() => onIncreaseStock(id)}
-                className="w-9 h-9 rounded-lg bg-white border-2 border-black hover:bg-zinc-100 flex items-center justify-center text-black font-black active:scale-90 transition-transform cursor-pointer font-sans"
+                className="w-7.5 h-7.5 rounded-lg bg-white border-2 border-black hover:bg-zinc-100 flex items-center justify-center text-black font-black active:scale-90 transition-transform cursor-pointer font-sans"
                 title="Aumentar stock"
-                style={{ width: '36px', height: '36px' }}
+                style={{ width: '30px', height: '30px' }}
               >
-                <Plus className="w-4.5 h-4.5 stroke-[4]" />
+                <Plus className="w-3.5 h-3.5 stroke-[4]" />
               </button>
             </div>
           )}
@@ -253,11 +253,13 @@ export function ProductCard({
               ✕ Cerrar
             </button>
             <div className="bg-white border-4 border-black rounded-3xl overflow-hidden shadow-2xl p-2">
-              <img
-                src={imagen}
-                alt={descripcion}
-                className="w-full max-h-[400px] object-contain rounded-2xl mx-auto"
-              />
+              <div className="w-full h-64 bg-zinc-100 rounded-2xl overflow-hidden flex items-center justify-center relative">
+                <img
+                  src={imagen}
+                  alt={descripcion}
+                  className="w-full h-full object-contain"
+                />
+              </div>
               <div className="p-4 bg-zinc-50 border-t border-zinc-200 mt-2 rounded-xl text-center">
                 <span className="bg-black text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase font-mono tracking-widest inline-block mb-1.5">
                   {categoria}
