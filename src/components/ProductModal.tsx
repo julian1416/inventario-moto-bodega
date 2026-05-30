@@ -11,6 +11,12 @@ interface ProductModalProps {
   productToEdit: Product | null;
 }
 
+const formatPriceWithDots = (val: string): string => {
+  const clean = val.replace(/\D/g, '');
+  if (!clean) return '';
+  return clean.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 const CATEGORY_ICONS: Record<Category, string> = {
   Cascos: '🪖',
   Llantas: '🛞',
@@ -110,13 +116,14 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
     }
 
     try {
+      const pDigits = precio.replace(/\D/g, '');
       await onSave({
         categoria,
         descripcion: descripcion.trim(),
         stock: finalStock,
         imagen: finalImage,
         tallas: isSizeCategory ? tallasStock : undefined,
-        precio: categoria === 'Llantas' && precio ? Number(precio) : undefined,
+        precio: categoria === 'Llantas' ? (pDigits ? Number(pDigits) : 0) : undefined,
         ...(productToEdit ? { id: productToEdit.id } : {}),
       });
       onClose();
@@ -206,8 +213,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={precio ? Number(precio).toLocaleString('es-CO') : ''}
+                  value={formatPriceWithDots(precio)}
                   onChange={(e) => {
                     const rawValue = e.target.value.replace(/\D/g, '');
                     setPrecio(rawValue);
@@ -217,7 +223,7 @@ export function ProductModal({ isOpen, onClose, onSave, productToEdit }: Product
                 />
               </div>
               <span className="block text-[8px] font-bold text-zinc-400 font-mono text-right uppercase leading-none mt-1">
-                Ingresa valor sin puntos ni signos
+                Ingresa valor, se formateará con puntos automáticamente
               </span>
             </div>
           )}
