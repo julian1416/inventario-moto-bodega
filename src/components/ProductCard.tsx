@@ -262,37 +262,120 @@ export function ProductCard({
           role="dialog"
           aria-modal="true"
           onClick={() => setIsZoomed(false)}
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-fade-in"
+          className="fixed inset-0 z-50 bg-zinc-200/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
         >
-          <div className="max-w-md w-full relative">
-            <button
-              onClick={() => setIsZoomed(false)}
-              className="absolute -top-12 right-0 text-white font-black text-xs uppercase flex items-center gap-1 cursor-pointer bg-zinc-900 border-2 border-white px-3 py-1.5 rounded-full"
-            >
-              ✕ Cerrar
-            </button>
-            <div className="bg-white rounded-3xl overflow-hidden shadow-2xl p-2">
-              <div className="w-full h-64 bg-zinc-50 rounded-2xl overflow-hidden flex items-center justify-center relative">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-[28px] border border-zinc-200/60 shadow-xl max-w-sm w-full max-h-[85vh] flex flex-col p-5 relative"
+          >
+            {/* STICKY TOP HEADER INSIDE THE CARD */}
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 shrink-0">
+              <span className="text-[10px] font-bold text-zinc-400 font-mono tracking-widest uppercase">
+                ⚡ Vista de Producto
+              </span>
+              <button
+                onClick={() => setIsZoomed(false)}
+                className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center font-bold text-zinc-500 cursor-pointer text-xs transition-colors"
+                title="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* SCROLLABLE CONTENT BODY */}
+            <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1 no-scrollbar">
+              
+              {/* Category label */}
+              <div className="text-center">
+                <span className="bg-zinc-950 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase font-mono tracking-wider inline-block">
+                  {getCategoryEmoji(categoria)} {categoria.toUpperCase()}
+                </span>
+              </div>
+
+              {/* IMAGE WITH MAX-HEIGHT: 40VH CONTAINER AND OBJECT-CONTAIN */}
+              <div className="w-full bg-zinc-50 rounded-2xl overflow-hidden flex items-center justify-center p-2.5 border border-zinc-100/60 max-h-[40vh] min-h-[160px]">
                 <img
                   src={imagen}
                   alt={descripcion}
-                  className="w-full h-full object-contain"
+                  className="w-full max-h-[35vh] object-contain rounded-xl select-none"
                 />
               </div>
-              <div className="p-4 bg-white mt-2 rounded-xl text-center">
-                <span className="bg-zinc-950 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase font-mono tracking-widest inline-block mb-1.5">
-                  {categoria}
+
+              {/* PRODUCT DESCRIPTION - FULL TEXT, MULTIPLE LINES, NO ELLIPSIS TRUNCATION */}
+              <div className="text-center px-1">
+                <p className="text-sm font-extrabold text-zinc-950 uppercase leading-snug break-words whitespace-pre-line">
+                  {(!descripcion || descripcion === 'undefined' || descripcion === 'null') ? 'Sin descripción' : descripcion}
+                </p>
+              </div>
+
+              {/* STOCK STATUS BLOCK */}
+              <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-3.5 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-wider">STOCK ACTUAL</span>
+                <span className={`text-[13px] font-black px-3 py-1 rounded-xl font-mono ${
+                  isOutOfStock ? 'bg-zinc-200 text-zinc-600' : 'bg-emerald-50 text-emerald-700'
+                }`}>
+                  {stock} uds
                 </span>
-                <p className="text-sm font-bold text-zinc-900 uppercase leading-tight">{descripcion}</p>
-                <div className="mt-3 flex items-center justify-center gap-3 font-mono">
-                  <span className="text-xs font-medium text-zinc-400">STOCK ACTUAL:</span>
-                  <span className={`text-[15px] font-black px-3 py-0.5 rounded-full ${
-                    isOutOfStock ? 'bg-zinc-100 text-zinc-500' : 'bg-emerald-50 text-emerald-700'
-                  }`}>
-                    {stock} uds
+              </div>
+
+              {/* TALLAS DISPLAY INNER SCROLL STATE (FOR SIZED CATEGORIES) */}
+              {hasTallas && (
+                <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-3.5 space-y-2">
+                  <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-wider block">DETALLE POR TALLAS</span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {['S', 'M', 'L', 'XL', 'XXL']
+                      .filter((sz) => (tallas[sz] || 0) > 0)
+                      .map((sz) => (
+                        <div key={sz} className="flex items-center justify-between bg-white border border-zinc-100 rounded-xl px-2.5 py-1.5 text-xs font-mono">
+                          <span className="font-extrabold text-zinc-950">{sz}</span>
+                          <span className="font-bold text-emerald-700">{tallas[sz]} uds</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* PRICE ROW IN BODEGA */}
+              {categoria === 'Llantas' && (
+                <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-3.5 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-wider">PRECIO DE VENTA</span>
+                  <span className="text-[14px] font-black text-emerald-700 font-mono">
+                    ${precio ? precio.toLocaleString('es-CO') : '0'}
                   </span>
                 </div>
-              </div>
+              )}
+
+            </div>
+
+            {/* FIXED BOTTOM ACTION BUTTONS */}
+            <div className="border-t border-zinc-100 pt-3.5 flex gap-3 shrink-0">
+              
+              {/* EDIT ACTION */}
+              <button
+                onClick={() => {
+                  setIsZoomed(false);
+                  onEdit(product);
+                }}
+                className="flex-1 bg-white hover:bg-zinc-50 text-zinc-950 border-2 border-zinc-950 rounded-xl py-3 px-3 text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Editar</span>
+              </button>
+
+              {/* DELETE ACTION */}
+              <button
+                onClick={() => {
+                  setIsZoomed(false);
+                  if (window.confirm('¿Seguro que deseas eliminar este accesorio?')) {
+                    onDelete(id);
+                  }
+                }}
+                className="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-250 rounded-xl py-3 px-3 text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Borrar</span>
+              </button>
+
             </div>
           </div>
         </div>
