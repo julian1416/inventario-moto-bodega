@@ -26,9 +26,9 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
   useEffect(() => {
     if (product) {
       const { cleanDesc, size } = getCleanDescAndSize(product.descripcion);
-      setSelectedSize(size || 'M'); // default to 'M' or whatever
+      setSelectedSize(size || 'M'); // default to 'M'
       setDescription(cleanDesc);
-      setStock(1); // default arrival quantity is usually 1 or 2
+      setStock(1);
     }
   }, [product, isOpen]);
 
@@ -57,17 +57,17 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-[393px] rounded-3xl border-3 border-black shadow-2xl overflow-hidden flex flex-col my-auto">
+    <div className="fixed inset-0 z-50 bg-[#000000]/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-[370px] rounded-[28px] border border-zinc-100 shadow-xl overflow-hidden flex flex-col my-auto">
         
         {/* Header styling */}
-        <div className="bg-zinc-50 border-b-2 border-black p-4 flex items-center justify-between">
-          <h2 className="text-sm font-black text-black uppercase font-mono">
-            📋 Clonar para Nueva Talla
+        <div className="bg-white border-b border-zinc-100 p-4.5 flex items-center justify-between">
+          <h2 className="text-[14px] font-bold text-zinc-950 uppercase tracking-wide">
+            Clonar para Nueva Talla
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black hover:bg-zinc-105 text-black cursor-pointer"
+            className="w-7 h-7 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center font-bold text-zinc-500 cursor-pointer text-xs"
           >
             ✕
           </button>
@@ -75,28 +75,28 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
 
         {/* Content */}
         <form onSubmit={handleConfirm} className="p-5 space-y-4">
-          <div className="space-y-1 bg-zinc-50 border border-zinc-200 rounded-xl p-3">
-            <span className="text-[9px] font-black text-zinc-400 font-mono block uppercase">Diseño base:</span>
-            <span className="text-xs font-black text-black block uppercase">{product.descripcion}</span>
+          <div className="space-y-1 bg-zinc-50 border border-zinc-100 rounded-xl p-3">
+            <span className="text-[9px] font-bold text-zinc-400 font-mono block uppercase tracking-wider">Diseño base:</span>
+            <span className="text-xs font-bold text-zinc-800 block uppercase leading-snug">{product.descripcion}</span>
           </div>
 
           {/* Description manual modifier */}
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-black text-zinc-500 uppercase font-mono tracking-wider">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-sans">
               Nombre de Diseño (Sin Talla)
             </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-xs font-black text-black uppercase focus:outline-none"
+              className="w-full bg-zinc-50 hover:bg-zinc-50 border border-zinc-200 rounded-xl p-2.5 text-xs font-semibold text-zinc-950 uppercase focus:bg-white focus:outline-none transition-all"
             />
           </div>
 
           {/* SIZES SELECTOR (ONLY APPEARS FOR 'Cascos' or 'Impermeables') */}
           {isSizeCategory && (
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-black text-zinc-500 uppercase font-mono tracking-wider">
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-sans">
                 Selecciona la Talla que llegará
               </label>
               <div className="flex gap-1 justify-between">
@@ -107,10 +107,10 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
                       key={size}
                       type="button"
                       onClick={() => setSelectedSize(size)}
-                      className={`flex-1 py-1.5 rounded-lg text-center border-2 font-black text-[12px] active:scale-95 transition-all cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-lg text-center border font-semibold text-[12px] active:scale-95 transition-all cursor-pointer ${
                         isCurrentSize
-                          ? 'bg-black text-white border-black'
-                          : 'bg-zinc-50 text-black border-zinc-200 hover:border-black'
+                          ? 'bg-zinc-950 text-white border-zinc-950 shadow-xs'
+                          : 'bg-zinc-50 text-zinc-650 border-zinc-200/60 hover:border-zinc-350'
                       }`}
                     >
                       {size}
@@ -123,14 +123,14 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
 
           {/* Quantity numeric selector */}
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-black text-zinc-500 uppercase font-mono tracking-wider">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-sans">
               Cantidad Recibida (Stock de esta Talla)
             </label>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setStock((prev) => Math.max(1, prev - 1))}
-                className="w-12 h-12 bg-zinc-50 hover:bg-zinc-100 border-2 border-black rounded-xl text-black font-black text-lg flex items-center justify-center active:scale-95 cursor-pointer"
+                className="w-10 h-10 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-xl text-zinc-800 font-bold text-lg flex items-center justify-center active:scale-95 cursor-pointer"
               >
                 -
               </button>
@@ -138,12 +138,12 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
                 type="number"
                 value={stock}
                 onChange={(e) => setStock(Math.max(1, parseInt(e.target.value) || 1))}
-                className="flex-1 h-12 bg-white border-2 border-black rounded-xl text-center text-[15px] font-black text-black font-mono focus:outline-none"
+                className="flex-1 h-10 bg-white border border-zinc-200 rounded-xl text-center text-[14px] font-bold text-zinc-950 font-mono focus:outline-none focus:border-zinc-300 transition-all"
               />
               <button
                 type="button"
                 onClick={() => setStock((prev) => prev + 1)}
-                className="w-12 h-12 bg-zinc-50 hover:bg-zinc-100 border-2 border-black rounded-xl text-black font-black text-lg flex items-center justify-center active:scale-95 cursor-pointer"
+                className="w-10 h-10 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-xl text-zinc-800 font-bold text-lg flex items-center justify-center active:scale-95 cursor-pointer"
               >
                 +
               </button>
@@ -151,29 +151,29 @@ export function DuplicateModal({ isOpen, onClose, product, onDuplicateConfirm }:
           </div>
 
           {/* Preview of output */}
-          <div className="border border-zinc-200 rounded-xl p-3 bg-zinc-55/40 text-center">
-            <span className="text-[8px] font-mono font-bold text-zinc-400 block uppercase mb-1">Previsualización del Producto</span>
-            <span className="text-[13px] font-black text-black tracking-tight block uppercase">
+          <div className="border border-zinc-100 bg-zinc-50/50 rounded-2xl p-3 text-center">
+            <span className="text-[8px] font-mono font-bold text-zinc-400 block uppercase tracking-wider mb-1">Previsualización del Producto</span>
+            <span className="text-[12px] font-bold text-zinc-900 tracking-tight block uppercase">
               {finalPreviewName}
             </span>
-            <span className="text-[10px] font-black text-zinc-500 block mt-1">
+            <span className="text-[9px] font-bold text-zinc-500 block mt-1 uppercase tracking-wide">
               {stock} UNIDAD(ES) EN STOCK
             </span>
           </div>
 
           {/* Action buttons */}
-          <div className="pt-3 border-t-2 border-zinc-200 flex gap-3">
+          <div className="pt-3.5 border-t border-zinc-100 flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-white hover:bg-zinc-50 border-2 border-zinc-300 py-3 rounded-2xl text-[12px] font-black text-black uppercase active:scale-95 cursor-pointer"
+              className="flex-1 bg-zinc-50 hover:bg-zinc-100 rounded-xl py-2.5 text-[12px] font-bold text-zinc-750 uppercase active:scale-95 cursor-pointer transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex-1 bg-black hover:bg-zinc-900 border-2 border-black py-3 rounded-2xl text-[12px] font-black text-white uppercase active:scale-95 cursor-pointer disabled:opacity-45"
+              className="flex-1 bg-zinc-950 hover:bg-zinc-900 rounded-xl py-2.5 text-[12px] font-bold text-white uppercase active:scale-95 cursor-pointer disabled:opacity-45 transition-colors"
             >
               Duplicar
             </button>
