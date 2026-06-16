@@ -262,7 +262,7 @@ export function ProductCard({
           role="dialog"
           aria-modal="true"
           onClick={() => setIsZoomed(false)}
-          className="fixed inset-0 z-50 bg-zinc-200/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+          className="fixed inset-0 z-[100] bg-zinc-200/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
         >
           <div
             onClick={(e) => e.stopPropagation()}
